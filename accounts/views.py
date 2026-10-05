@@ -251,3 +251,31 @@ def group_delete(request, pk):
         'object': group,
         'title': 'Удаление группы',
     })
+@login_required
+def dashboard(request):
+    departments = Department.objects.all()
+
+    department_names = []
+    courses_by_department = []
+    groups_by_department = []
+
+    for department in departments:
+        department_names.append(department.name)
+        courses_by_department.append(
+            Course.objects.filter(department=department).count()
+        )
+        groups_by_department.append(
+            AcademicGroup.objects.filter(department=department).count()
+        )
+
+    context = {
+        'total_courses': Course.objects.count(),
+        'total_departments': Department.objects.count(),
+        'total_groups': AcademicGroup.objects.count(),
+        'department_names': department_names,
+        'courses_by_department': courses_by_department,
+        'groups_by_department': groups_by_department,
+        'is_methodist': is_methodist(request.user),
+    }
+
+    return render(request, 'dashboard.html', context)
